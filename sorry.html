@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I'm Sorry (Please Read)</title>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ffd6e8;--ink:#2b1b4a;--card:#fff;--pop:#6c3df5;--yes:#1fb871;--line:#2b1b4a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2b1b4a;--ink:#ffe9f3;--card:#3b2766;--pop:#ff8fc2;--yes:#3ddc97;--line:#ffe9f3}}
+:root[data-theme="dark"]{--bg:#2b1b4a;--ink:#ffe9f3;--card:#3b2766;--pop:#ff8fc2;--yes:#3ddc97;--line:#ffe9f3}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 18px/1.55 Nunito,system-ui,sans-serif;overflow-x:hidden}
+main{max-width:640px;margin:0 auto;padding:28px 20px 60px}
+h1{font:400 clamp(44px,13vw,88px)/.95 "Bagel Fat One",Impact,sans-serif;margin:.2em 0 .15em;text-wrap:balance}
+h1 span{display:inline-block;animation:wob 1.6s ease-in-out infinite}
+h1 span:nth-child(2n){animation-delay:.25s}
+@keyframes wob{50%{transform:rotate(-4deg) translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){h1 span{animation:none}}
+.who{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.who input{font:inherit;font-weight:700;padding:8px 12px;border:3px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:11em;max-width:100%}
+.card{background:var(--card);border:3px solid var(--line);border-radius:18px;padding:18px 20px;margin:18px 0;box-shadow:6px 6px 0 var(--line)}
+.card:nth-of-type(odd){transform:rotate(-.8deg)}.card:nth-of-type(even){transform:rotate(.8deg)}
+.card h2{font:400 26px/1.1 "Bagel Fat One",Impact,sans-serif;margin:0 0 8px}
+.card ul{margin:0;padding-left:1.2em}
+.meter{height:26px;border:3px solid var(--line);border-radius:99px;overflow:hidden;background:var(--bg)}
+.meter i{display:block;height:100%;width:0;background:var(--pop);transition:width 1.4s cubic-bezier(.2,1.4,.4,1)}
+.meter-note{font-size:15px;margin-top:6px}
+.btns{position:relative;display:flex;gap:14px;flex-wrap:wrap;margin-top:22px;min-height:64px}
+button{font:400 22px "Bagel Fat One",Impact,sans-serif;padding:14px 22px;border:3px solid var(--line);border-radius:14px;cursor:pointer;color:#fff;box-shadow:4px 4px 0 var(--line)}
+button:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
+button:focus-visible,.who input:focus-visible{outline:4px solid var(--pop);outline-offset:3px}
+#yes{background:var(--yes);color:#06301d}
+#no{background:var(--pop);color:#fff;transition:transform .15s}
+#bribe{background:var(--card);color:var(--ink);font-size:16px;align-self:center}
+.toast{min-height:1.6em;font-weight:700;margin-top:14px}
+.confetti{position:fixed;top:-30px;font-size:28px;pointer-events:none;animation:fall 2.8s linear forwards;z-index:9}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.8}}
+footer{margin-top:34px;font-size:14px;opacity:.8}
+</style>
+</head>
+<body>
+<main>
+  <div class="who">
+    <label for="n">Sorry, </label><input id="n" placeholder="type their name" maxlength="24" autocomplete="off">
+  </div>
+  <h1 id="title" aria-label="I messed up">I messed up.</h1>
+  <p>This website cost me <b>zero dollars</b> and <b>several minutes of dignity</b>. I'd say that shows how much I care. Please read all of it. There is a quiz at the end. (There is no quiz.)</p>
+
+  <section class="card">
+    <h2>Current sorry level</h2>
+    <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="bar"></i></div>
+    <div class="meter-note">Maximum. The meter broke at 100% and I'm still sorry.</div>
+  </section>
+
+  <section class="card">
+    <h2>Evidence of my remorse</h2>
+    <p>I have stared at the ceiling. I have rehearsed this apology in the shower. I have said "ugh, I'm the worst" to a houseplant. The houseplant has not forgiven me either.</p>
+  </section>
+
+  <h2 style="font:400 30px/1.1 'Bagel Fat One',Impact,sans-serif;margin-top:36px">So… are we good?</h2>
+  <div class="btns" id="btns">
+    <button id="yes">Yes, I forgive you</button>
+    <button id="no">No</button>
+    <button id="bribe">I'll buy snacks</button>
+  </div>
+  <div class="toast" id="toast" aria-live="polite"></div>
+  <footer>Made with guilt and a text editor. Terms: you may forgive me at any time.</footer>
+</main>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var title=$('title'),name=$('n'),toast=$('toast'),no=$('no');
+  function render(){
+    var v=name.value.trim(),t=v?'I messed up, '+v+'.':'I messed up.';
+    title.setAttribute('aria-label',t);
+    title.innerHTML=t.split('').map(function(c){return c===' '?' ':'<span aria-hidden="true">'+c.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>'}).join('');
+  }
+  name.addEventListener('input',render);render();
+  setTimeout(function(){$('bar').style.width='100%'},300);
+
+  var dodges=0,lines=["Nice try.","The No button is shy.","Wow, still no? Bold.","It's literally running away from you.","Even the button forgave me."];
+  function dodge(){
+    var b=$('btns').getBoundingClientRect(),r=no.getBoundingClientRect();
+    var maxX=Math.max(0,b.width-r.width),dx=Math.random()*maxX-(r.left-b.left);
+    var dy=(Math.random()-.5)*160;
+    no.style.transform='translate('+dx+'px,'+dy+'px) rotate('+((Math.random()-.5)*30)+'deg)';
+    toast.textContent=lines[dodges++%lines.length];
+  }
+  no.addEventListener('mouseenter',dodge);
+  no.addEventListener('touchstart',function(e){e.preventDefault();dodge()},{passive:false});
+  no.addEventListener('click',dodge);
+
+  function rain(list){
+    for(var i=0;i<36;i++){
+      var s=document.createElement('div');s.className='confetti';
+      s.textContent=list[i%list.length];
+      s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.9+'s';
+      document.body.appendChild(s);setTimeout(function(el){el.remove()},4000,s);
+    }
+  }
+  $('yes').addEventListener('click',function(){
+    var v=name.value.trim();
+    toast.textContent='Yay!! Thank you'+(v?', '+v:'')+'. You are the bigger person. I am a small, grateful goblin.';
+    rain(['🎉','💖','🙏','🍪','✨']);
+  });
+  $('bribe').addEventListener('click',function(){
+    toast.textContent='Snacks acknowledged. Forgiveness is now 40% likely.';
+    rain(['🍕','🍫','🍟','🍩']);
+  });
+})();
+</script>
+</body>
+</html>
